@@ -8,6 +8,7 @@ namespace whud_state_machine {
 
 class PluginBase {
  public:
+  PluginBase() {}
   PluginBase(const PluginBase&) = delete;
   ~PluginBase() {}
 
