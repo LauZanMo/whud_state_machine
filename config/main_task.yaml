@@ -1,0 +1,21 @@
+# 
+# main task list
+# 
+# if you want to add main task, delete "[]" and add task like this:
+# main_task_list:
+# - task_A
+# - task_B
+#   ...
+main_task_list: []
+
+# 
+# main task description
+# 
+# task_A:
+#   plugin_name: 
+#   delay_timeout: 10
+#   param:
+#   - param_A
+#   - param_B
+#   task_name: "task_A"
+#   attach_name: 

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="whud_state_machine" type="whud_state_machine_node" name="whud_state_machine_node" output="screen">
+    <param name="loop_frequency" value="10"/>
+    <param name="state_machine_threads" value="4"/>
+
+    <rosparam file="$(find whud_state_machine)/config/main_task.yaml" command="load"/>
+    <rosparam file="$(find whud_state_machine)/config/interrupt_task.yaml" command="load"/>
+  </node>
+
+</launch>

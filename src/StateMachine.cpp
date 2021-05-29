@@ -72,10 +72,10 @@ void StateMachine::SetTask(const ros::TimerEvent &event) {
   // set main task
   current_main_task_plugin_ = plugin_map_[main_task_iterator_->plugin_name];
   current_main_task_plugin_->SetTask(main_task_iterator_->param);
+  ROS_INFO_STREAM("Current task is " + main_task_iterator_->task_name);
 
   // enable main plugin control
   current_main_task_plugin_->EnableControl();
-  current_interrupt_task_plugin_->DisableControl();
 
   // set interrupt task
   if (disable_interrupt_flag_) {
@@ -102,6 +102,8 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
     if (interrupt_flag) {
       // check last interrupt flag
       if (last_interrupt_flag_ != interrupt_flag) {
+        ROS_INFO_STREAM("Current task is " + main_task_iterator_->attach_name);
+
         // record begin time
         interrupt_task_begin_time_ = event.current_expected;
 
@@ -155,6 +157,8 @@ void StateMachine::CheckLoopStatus() {
   switch (state_machine_status_) {
     case StateMachineStatus::MAIN_TASK:
       if (current_main_task_plugin_->GetTaskStatus() == TaskStatus::DONE) {
+        ROS_INFO_STREAM("Task " + main_task_iterator_->task_name + " is done");
+
         // disable plugin control
         current_main_task_plugin_->DisableControl();
         current_interrupt_task_plugin_->DisableControl();
@@ -170,6 +174,8 @@ void StateMachine::CheckLoopStatus() {
       break;
 
     case StateMachineStatus::MAIN_TASK_TIMEOUT:
+      ROS_INFO_STREAM("Task " + main_task_iterator_->task_name + " is timeout");
+
       // stop current task
       current_main_task_plugin_->StopTask();
 
@@ -188,6 +194,9 @@ void StateMachine::CheckLoopStatus() {
 
     case StateMachineStatus::INTERRUPT_TASK:
       if (current_interrupt_task_plugin_->GetTaskStatus() == TaskStatus::DONE) {
+        ROS_INFO_STREAM("Task " + main_task_iterator_->attach_name +
+                        " is done");
+
         // disable plugin control
         current_main_task_plugin_->DisableControl();
         current_interrupt_task_plugin_->DisableControl();
@@ -210,6 +219,9 @@ void StateMachine::CheckLoopStatus() {
       break;
 
     case StateMachineStatus::INTERRUPT_TASK_TIMEOUT:
+      ROS_INFO_STREAM("Task " + main_task_iterator_->attach_name +
+                      " is timeout");
+
       // stop current task
       current_interrupt_task_plugin_->StopTask();
 

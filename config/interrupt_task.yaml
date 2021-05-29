@@ -1,0 +1,10 @@
+# 
+# interrupt task description
+# 
+# task_A:
+#   plugin_name: 
+#   delay_timeout: 10
+#   param:
+#   - param_A
+#   - param_B
+#   return_name: 
