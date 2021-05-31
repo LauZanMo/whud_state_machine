@@ -7,6 +7,7 @@
 
     <rosparam file="$(find whud_state_machine)/config/main_task.yaml" command="load"/>
     <rosparam file="$(find whud_state_machine)/config/interrupt_task.yaml" command="load"/>
+    <rosparam file="$(find whud_state_machine)/config/plugin_params.yaml" command="load"/>
   </node>
 
 </launch>
