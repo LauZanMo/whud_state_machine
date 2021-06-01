@@ -34,6 +34,10 @@ class WhudNavClient : public PluginBase {
 
     nav_vel_sub_ =
         nh_.subscribe("cmd_vel", 1, &WhudNavClient::nav_vel_cb, this);
+
+    nav_client_.waitForServer();
+    tf_listener_.waitForTransform("/" + map_frame_id_, "/" + body_frame_id_,
+                                  ros::Time(0), ros::Duration(0, 0));
   }
 
   void nav_vel_cb(const geometry_msgs::Twist::ConstPtr &req) {
@@ -47,8 +51,8 @@ class WhudNavClient : public PluginBase {
     // TODO: add param parse
 
     // goal serialization
-    while (!TransformDetector())
-      ROS_WARN("Can not find trasform from body frame to map");
+    // while (!TransformDetector())
+    //   ROS_WARN("Can not find trasform from body frame to map");
 
     if (!ConsensusDetector(set_pose)) {
       ROS_WARN("You set the pose which is the same as last set");

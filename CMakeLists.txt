@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   pluginlib
   roscpp
+  actionlib
+  move_base_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES whud_state_machine
-  CATKIN_DEPENDS geometry_msgs pluginlib roscpp mavros
+#  CATKIN_DEPENDS geometry_msgs pluginlib roscpp
 #  DEPENDS system_lib
 )
 

@@ -1,5 +1,5 @@
 <library path="lib/libwhud_state_machine">
-  <class type="whud_state_machine::WhudNavClient" base_class_type="whud_state_machine::PluginBase">
+  <class name="whud_nav_client" type="whud_state_machine::WhudNavClient" base_class_type="whud_state_machine::PluginBase">
     <description>
     Load parameters and communicate with move base server.
     </description>
