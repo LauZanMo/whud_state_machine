@@ -88,7 +88,7 @@ void StateMachine::SetTask(const ros::TimerEvent &event) {
     SetInterruptTask(main_task_iterator_->attach_name);
 
   // record main task begin time
-  main_task_begin_time_ = event.current_expected;
+  main_task_begin_time_ = event.current_expected.now().toSec();
 
   // set loop status
   state_machine_status_ = StateMachineStatus::MAIN_TASK;
@@ -105,7 +105,7 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
         ROS_INFO_STREAM("Current task is " + main_task_iterator_->attach_name);
 
         // record begin time
-        interrupt_task_begin_time_ = event.current_expected;
+        interrupt_task_begin_time_ = event.current_expected.now().toSec();
 
         // set loop status
         state_machine_status_ = StateMachineStatus::INTERRUPT_TASK;
@@ -119,8 +119,7 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
       current_interrupt_task_plugin_->TaskSpin();
 
       // check interrupt task timeout
-      if (event.current_expected.now().toSec() -
-              interrupt_task_begin_time_.now().toSec() >
+      if (event.current_expected.now().toSec() - interrupt_task_begin_time_ >
           current_interrupt_task_.delay_timeout)
         state_machine_status_ = StateMachineStatus::INTERRUPT_TASK_TIMEOUT;
 
@@ -129,8 +128,7 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
       current_main_task_plugin_->TaskSpin();
 
       // check main task timeout
-      if (event.current_expected.now().toSec() -
-              main_task_begin_time_.now().toSec() >
+      if (event.current_expected.now().toSec() - main_task_begin_time_ >
           main_task_iterator_->delay_timeout)
         state_machine_status_ = StateMachineStatus::MAIN_TASK_TIMEOUT;
     }
@@ -142,9 +140,10 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
     // main task spin
     current_main_task_plugin_->TaskSpin();
 
+    double a = event.current_expected.now().toSec() - main_task_begin_time_;
+
     // check main task timeout
-    if (event.current_expected.now().toSec() -
-            main_task_begin_time_.now().toSec() >
+    if (event.current_expected.now().toSec() - main_task_begin_time_ >
         main_task_iterator_->delay_timeout)
       state_machine_status_ = StateMachineStatus::MAIN_TASK_TIMEOUT;
 
@@ -161,11 +160,14 @@ void StateMachine::CheckLoopStatus() {
 
         // disable plugin control
         current_main_task_plugin_->DisableControl();
-        current_interrupt_task_plugin_->DisableControl();
+        if (current_interrupt_task_plugin_ != nullptr)
+          current_interrupt_task_plugin_->DisableControl();
 
         // check main task vector and set loop status
-        if (main_task_iterator_ == main_task_vector_.end())
+        if (main_task_iterator_ == main_task_vector_.end() - 1) {
           state_machine_status_ = StateMachineStatus::END;
+          ROS_INFO("State machine end");
+        }
         else {
           state_machine_status_ = StateMachineStatus::FREE;
           ++main_task_iterator_;
@@ -181,11 +183,14 @@ void StateMachine::CheckLoopStatus() {
 
       // disable plugin control
       current_main_task_plugin_->DisableControl();
-      current_interrupt_task_plugin_->DisableControl();
+      if (current_interrupt_task_plugin_ != nullptr)
+        current_interrupt_task_plugin_->DisableControl();
 
       // check main task vector and set loop status
-      if (main_task_iterator_ == main_task_vector_.end())
+      if (main_task_iterator_ == main_task_vector_.end() - 1) {
         state_machine_status_ = StateMachineStatus::END;
+        ROS_INFO("State machine end");
+      }
       else {
         state_machine_status_ = StateMachineStatus::FREE;
         ++main_task_iterator_;

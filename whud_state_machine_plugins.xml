@@ -1,7 +1,15 @@
 <library path="lib/libwhud_state_machine">
+
   <class name="whud_nav_client" type="whud_state_machine::WhudNavClient" base_class_type="whud_state_machine::PluginBase">
     <description>
     Load parameters and communicate with move base server.
     </description>
   </class>
+
+  <class name="whud_basic_control" type="whud_state_machine::WhudBasicControl" base_class_type="whud_state_machine::PluginBase">
+    <description>
+    Control basic move(takeoff, land, yaw and height-control)
+    </description>
+  </class>
+
 </library>

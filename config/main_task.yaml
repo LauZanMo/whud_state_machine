@@ -1,21 +1,37 @@
-# 
+#
 # main task list
-# 
+#
 # if you want to add main task, delete "[]" and add task like this:
 # main_task_list:
 # - task_A
 # - task_B
 #   ...
-main_task_list: []
+main_task_list:
+  - task_A
+  - task_B
 
-# 
+#
 # main task description
-# 
+#
 # task_A:
-#   plugin_name: 
+#   plugin_name:
 #   delay_timeout: 10
 #   param:
 #   - param_A
 #   - param_B
 #   task_name: "task_A"
-#   attach_name: 
+#   attach_name:
+
+task_A:
+  plugin_name: "whud_basic_control"
+  delay_timeout: 10
+  param: [takeoff, 0, 1.0]
+  task_name: "task_A"
+  attach_name: "none"
+
+task_B:
+  plugin_name: "whud_basic_control"
+  delay_timeout: 10
+  param: [takeoff, 0, 1.0]
+  task_name: "task_B"
+  attach_name: "none"

@@ -35,9 +35,9 @@ class WhudNavClient : public PluginBase {
     nav_vel_sub_ =
         nh_.subscribe("cmd_vel", 1, &WhudNavClient::nav_vel_cb, this);
 
-    nav_client_.waitForServer();
-    tf_listener_.waitForTransform("/" + map_frame_id_, "/" + body_frame_id_,
-                                  ros::Time(0), ros::Duration(0, 0));
+    // nav_client_.waitForServer();
+    // tf_listener_.waitForTransform("/" + map_frame_id_, "/" + body_frame_id_,
+    //                               ros::Time(0), ros::Duration(0, 0));
   }
 
   void nav_vel_cb(const geometry_msgs::Twist::ConstPtr &req) {
@@ -48,7 +48,15 @@ class WhudNavClient : public PluginBase {
   virtual bool SetTask(ros::V_string param) override {
     PluginBase::SetTask(param);
     geometry_msgs::Pose set_pose;
-    // TODO: add param parse
+    set_pose.position.x = (atof(param[0].c_str()));
+    set_pose.position.y = (atof(param[1].c_str()));
+    set_pose.position.z = 0;
+    tf::Quaternion q;
+    q.setRPY(0, 0, 0);
+    set_pose.orientation.x = q.getX();
+    set_pose.orientation.y = q.getY();
+    set_pose.orientation.z = q.getZ();
+    set_pose.orientation.w = q.getW();
 
     // goal serialization
     // while (!TransformDetector())

@@ -36,8 +36,8 @@ class StateMachine {
   InterruptTask current_interrupt_task_;
 
   bool disable_interrupt_flag_ = false;
-  ros::Time main_task_begin_time_;
-  ros::Time interrupt_task_begin_time_;
+  double main_task_begin_time_;
+  double interrupt_task_begin_time_;
   bool last_interrupt_flag_ = false;
 
   // plugins
