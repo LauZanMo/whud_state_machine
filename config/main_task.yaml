@@ -25,13 +25,13 @@ main_task_list:
 task_A:
   plugin_name: "whud_basic_control"
   delay_timeout: 10
-  param: [takeoff, 0, 1.0]
+  param: [takeoff, "0", "1.0"]
   task_name: "task_A"
   attach_name: "none"
 
 task_B:
   plugin_name: "whud_basic_control"
   delay_timeout: 10
-  param: [takeoff, 0, 1.0]
+  param: [takeoff, "0", "1.0"]
   task_name: "task_B"
   attach_name: "none"
