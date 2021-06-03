@@ -15,12 +15,12 @@ namespace whud_state_machine {
 using PluginPtr = boost::shared_ptr<PluginBase>;
 
 class StateMachine {
- public:
+public:
   StateMachine();
   ~StateMachine();
   void Run();
 
- private:
+private:
   // state machine
   ros::NodeHandle nh_;
   ros::Timer loop_timer_;

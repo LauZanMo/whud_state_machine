@@ -11,12 +11,12 @@ using namespace std;
 namespace whud_state_machine {
 
 class WhudNavClient : public PluginBase {
- public:
+public:
   WhudNavClient()
       : PluginBase(), nh_("~whud_nav_client"), nav_client_("nav_client") {}
   ~WhudNavClient() {}
 
- private:
+private:
   ros::NodeHandle nh_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> nav_client_;
   ros::Subscriber nav_vel_sub_;
@@ -78,7 +78,9 @@ class WhudNavClient : public PluginBase {
 
   virtual void TaskSpin() override {}
 
-  virtual void StopTask() override { nav_client_.cancelGoal(); }
+  virtual void StopTask() override {
+    nav_client_.cancelGoal();
+  }
 
   void ActiveCb() {}
 

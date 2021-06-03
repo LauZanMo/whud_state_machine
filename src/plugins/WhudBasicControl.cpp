@@ -14,7 +14,9 @@ public:
   WhudBasicControl() : PluginBase(), sm_nh_("~basic_control"){};
 
   enum Command { NONE = 0, TAKEOFF, LAND, HEIGHT_CONTROL, YAW_CONTROL };
-  void OnInit(MavRosPublisher &mavros_pub) { mavros_pub_ = &mavros_pub; }
+  void OnInit(MavRosPublisher &mavros_pub) {
+    mavros_pub_ = &mavros_pub;
+  }
 
   bool SetTask(ros::V_string param) {
     PluginBase::SetTask(param);
@@ -122,7 +124,7 @@ private:
   int mavros_result_;
 };
 
-} // namespace whud_state_machine
+}  // namespace whud_state_machine
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(whud_state_machine::WhudBasicControl,

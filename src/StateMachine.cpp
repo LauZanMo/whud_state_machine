@@ -154,32 +154,9 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
 
 void StateMachine::CheckLoopStatus() {
   switch (state_machine_status_) {
-    case StateMachineStatus::MAIN_TASK:
-      if (current_main_task_plugin_->GetTaskStatus() == TaskStatus::DONE) {
-        ROS_INFO_STREAM("Task " + main_task_iterator_->task_name + " is done");
-
-        // disable plugin control
-        current_main_task_plugin_->DisableControl();
-        if (current_interrupt_task_plugin_ != nullptr)
-          current_interrupt_task_plugin_->DisableControl();
-
-        // check main task vector and set loop status
-        if (main_task_iterator_ == main_task_vector_.end() - 1) {
-          state_machine_status_ = StateMachineStatus::END;
-          ROS_INFO("State machine end");
-        }
-        else {
-          state_machine_status_ = StateMachineStatus::FREE;
-          ++main_task_iterator_;
-        }
-      }
-      break;
-
-    case StateMachineStatus::MAIN_TASK_TIMEOUT:
-      ROS_INFO_STREAM("Task " + main_task_iterator_->task_name + " is timeout");
-
-      // stop current task
-      current_main_task_plugin_->StopTask();
+  case StateMachineStatus::MAIN_TASK:
+    if (current_main_task_plugin_->GetTaskStatus() == TaskStatus::DONE) {
+      ROS_INFO_STREAM("Task " + main_task_iterator_->task_name + " is done");
 
       // disable plugin control
       current_main_task_plugin_->DisableControl();
@@ -190,45 +167,37 @@ void StateMachine::CheckLoopStatus() {
       if (main_task_iterator_ == main_task_vector_.end() - 1) {
         state_machine_status_ = StateMachineStatus::END;
         ROS_INFO("State machine end");
-      }
-      else {
+      } else {
         state_machine_status_ = StateMachineStatus::FREE;
         ++main_task_iterator_;
       }
-      break;
+    }
+    break;
 
-    case StateMachineStatus::INTERRUPT_TASK:
-      if (current_interrupt_task_plugin_->GetTaskStatus() == TaskStatus::DONE) {
-        ROS_INFO_STREAM("Task " + main_task_iterator_->attach_name +
-                        " is done");
+  case StateMachineStatus::MAIN_TASK_TIMEOUT:
+    ROS_INFO_STREAM("Task " + main_task_iterator_->task_name + " is timeout");
 
-        // disable plugin control
-        current_main_task_plugin_->DisableControl();
-        current_interrupt_task_plugin_->DisableControl();
+    // stop current task
+    current_main_task_plugin_->StopTask();
 
-        // set loop status
-        state_machine_status_ = StateMachineStatus::FREE;
+    // disable plugin control
+    current_main_task_plugin_->DisableControl();
+    if (current_interrupt_task_plugin_ != nullptr)
+      current_interrupt_task_plugin_->DisableControl();
 
-        // reset last interrupt flag
-        last_interrupt_flag_ = false;
+    // check main task vector and set loop status
+    if (main_task_iterator_ == main_task_vector_.end() - 1) {
+      state_machine_status_ = StateMachineStatus::END;
+      ROS_INFO("State machine end");
+    } else {
+      state_machine_status_ = StateMachineStatus::FREE;
+      ++main_task_iterator_;
+    }
+    break;
 
-        // compare return name and main task name
-        for (auto iter = main_task_vector_.begin();
-             iter < main_task_vector_.end(); iter++) {
-          if (current_interrupt_task_.return_name == iter->task_name) {
-            main_task_iterator_ = iter;
-            break;
-          }
-        }
-      }
-      break;
-
-    case StateMachineStatus::INTERRUPT_TASK_TIMEOUT:
-      ROS_INFO_STREAM("Task " + main_task_iterator_->attach_name +
-                      " is timeout");
-
-      // stop current task
-      current_interrupt_task_plugin_->StopTask();
+  case StateMachineStatus::INTERRUPT_TASK:
+    if (current_interrupt_task_plugin_->GetTaskStatus() == TaskStatus::DONE) {
+      ROS_INFO_STREAM("Task " + main_task_iterator_->attach_name + " is done");
 
       // disable plugin control
       current_main_task_plugin_->DisableControl();
@@ -240,12 +209,39 @@ void StateMachine::CheckLoopStatus() {
       // reset last interrupt flag
       last_interrupt_flag_ = false;
 
-      // set disable interrupt flag
-      disable_interrupt_flag_ = true;
-      break;
+      // compare return name and main task name
+      for (auto iter = main_task_vector_.begin();
+           iter < main_task_vector_.end(); iter++) {
+        if (current_interrupt_task_.return_name == iter->task_name) {
+          main_task_iterator_ = iter;
+          break;
+        }
+      }
+    }
+    break;
 
-    default:
-      break;
+  case StateMachineStatus::INTERRUPT_TASK_TIMEOUT:
+    ROS_INFO_STREAM("Task " + main_task_iterator_->attach_name + " is timeout");
+
+    // stop current task
+    current_interrupt_task_plugin_->StopTask();
+
+    // disable plugin control
+    current_main_task_plugin_->DisableControl();
+    current_interrupt_task_plugin_->DisableControl();
+
+    // set loop status
+    state_machine_status_ = StateMachineStatus::FREE;
+
+    // reset last interrupt flag
+    last_interrupt_flag_ = false;
+
+    // set disable interrupt flag
+    disable_interrupt_flag_ = true;
+    break;
+
+  default:
+    break;
   }
 }
 
