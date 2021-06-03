@@ -16,16 +16,6 @@ public:
       : PluginBase(), nh_("~whud_nav_client"), nav_client_("nav_client") {}
   ~WhudNavClient() {}
 
-private:
-  ros::NodeHandle nh_;
-  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> nav_client_;
-  ros::Subscriber nav_vel_sub_;
-
-  tf::TransformListener tf_listener_;
-  string map_frame_id_, body_frame_id_;
-
-  geometry_msgs::Pose last_set_pose_;
-
   virtual void OnInit(MavRosPublisher &mavros_pub) override {
     PluginBase::OnInit(mavros_pub);
 
@@ -81,6 +71,16 @@ private:
   virtual void StopTask() override {
     nav_client_.cancelGoal();
   }
+
+private:
+  ros::NodeHandle nh_;
+  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> nav_client_;
+  ros::Subscriber nav_vel_sub_;
+
+  tf::TransformListener tf_listener_;
+  string map_frame_id_, body_frame_id_;
+
+  geometry_msgs::Pose last_set_pose_;
 
   void ActiveCb() {}
 

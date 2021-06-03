@@ -91,9 +91,9 @@ public:
         break;
 
       case Command::YAW_CONTROL:
-        if (mavros_command != 115 && mavros_result == 0)
+        if (mavros_command == 115 && mavros_result == 0)
           task_status_ = TaskStatus::DONE;
-        else if (mavros_command == 115 && mavros_result != 5)
+        else if (mavros_command != 115 && mavros_result != 5)
           mavros_pub_->yaw_pub.publish(yaw_control_);
         break;
 
