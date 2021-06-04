@@ -13,7 +13,7 @@ namespace whud_state_machine {
 class WhudNavClient : public PluginBase {
 public:
   WhudNavClient()
-      : PluginBase(), nh_("~whud_nav_client"), nav_client_("nav_client") {}
+      : PluginBase(), nh_("~whud_nav_client"), nav_client_("move_base") {}
   ~WhudNavClient() {}
 
   virtual void OnInit(MavRosPublisher &mavros_pub) override {
@@ -25,18 +25,14 @@ public:
     nav_vel_sub_ =
         nh_.subscribe("cmd_vel", 1, &WhudNavClient::nav_vel_cb, this);
 
-    // nav_client_.waitForServer();
-    // tf_listener_.waitForTransform("/" + map_frame_id_, "/" + body_frame_id_,
-    //                               ros::Time(0), ros::Duration(0, 0));
-  }
-
-  void nav_vel_cb(const geometry_msgs::Twist::ConstPtr &req) {
-    if (mavros_pub_ != nullptr && control_flag_)
-      mavros_pub_->cmd_vel_pub.publish(req);
+    nav_client_.waitForServer();
+    tf_listener_.waitForTransform("/" + map_frame_id_, "/" + body_frame_id_,
+                                  ros::Time(0), ros::Duration(0, 0));
   }
 
   virtual bool SetTask(ros::V_string param) override {
     PluginBase::SetTask(param);
+    // parse param passed by state machine
     geometry_msgs::Pose set_pose;
     set_pose.position.x = (atof(param[0].c_str()));
     set_pose.position.y = (atof(param[1].c_str()));
@@ -48,14 +44,12 @@ public:
     set_pose.orientation.z = q.getZ();
     set_pose.orientation.w = q.getW();
 
-    // goal serialization
-    // while (!TransformDetector())
-    //   ROS_WARN("Can not find trasform from body frame to map");
-
+    // detect consensus with last set pose
     if (!ConsensusDetector(set_pose)) {
       ROS_WARN("You set the pose which is the same as last set");
       task_status_ = TaskStatus::DONE;
     } else {
+      // goal serialization
       move_base_msgs::MoveBaseGoal goal = GoalSerialization(set_pose);
       nav_client_.sendGoal(
           goal,
@@ -92,9 +86,9 @@ private:
       task_status_ = TaskStatus::DONE;
   }
 
-  bool TransformDetector() const {
-    return tf_listener_.canTransform("/" + map_frame_id_, "/" + body_frame_id_,
-                                     ros::Time(0));
+  void nav_vel_cb(const geometry_msgs::Twist::ConstPtr &req) {
+    if (mavros_pub_ != nullptr && control_flag_)
+      mavros_pub_->cmd_vel_pub.publish(req);
   }
 
   bool ConsensusDetector(geometry_msgs::Pose set_pose) {
