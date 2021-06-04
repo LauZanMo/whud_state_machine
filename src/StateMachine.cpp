@@ -27,6 +27,10 @@ StateMachine::StateMachine()
   mavros_pub_.cmd_vel_pub = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
   mavros_pub_.conversion_pub = nh_.advertise<std_msgs::Bool>("conversion", 5);
 
+  // init service
+  get_task_list_srv_ =
+      nh_.advertiseService("get_task_list", &StateMachine::GetTaskList, this);
+
   // load plugin
   for (auto &plugin_name : plugin_loader_.getDeclaredClasses())
     LoadPlugin(plugin_name);
@@ -280,6 +284,45 @@ void StateMachine::SetInterruptTask(std::string &task_name) {
     current_interrupt_task_plugin_->DisableControl();
   } else
     current_interrupt_task_plugin_ = nullptr;
+}
+
+bool StateMachine::GetTaskList(whud_state_machine::GetTaskList::Request &req,
+                               whud_state_machine::GetTaskList::Response &res) {
+  if (req.Call) {
+    res.MainTaskList.clear();
+    res.InterruptTaskList.clear();
+    for (auto &task : main_task_vector_) {
+      res.MainTaskList.push_back(WrapMainTask(task));
+      if (task.attach_name != "none")
+        res.InterruptTaskList.push_back(WrapInterruptTask(task.attach_name));
+    }
+  }
+  return true;
+}
+
+WhudMainTask StateMachine::WrapMainTask(const MainTask task) {
+  WhudMainTask wrap_task;
+  wrap_task.plugin_name = task.plugin_name;
+  wrap_task.delay_timeout = task.delay_timeout;
+  wrap_task.param = task.param;
+  wrap_task.task_name = task.task_name;
+  wrap_task.attach_name = task.attach_name;
+  return wrap_task;
+}
+
+WhudInterruptTask StateMachine::WrapInterruptTask(const string task_name) {
+  WhudInterruptTask wrap_task;
+  InterruptTask task;
+  nh_.getParam(task_name + "/plugin_name", task.plugin_name);
+  nh_.getParam(task_name + "/delay_timeout", task.delay_timeout);
+  nh_.getParam(task_name + "/param", task.param);
+  nh_.getParam(task_name + "/return_name", task.return_name);
+
+  wrap_task.plugin_name = task.plugin_name;
+  wrap_task.delay_timeout = task.delay_timeout;
+  wrap_task.param = task.param;
+  wrap_task.return_name = task.return_name;
+  return wrap_task;
 }
 
 }  // namespace whud_state_machine

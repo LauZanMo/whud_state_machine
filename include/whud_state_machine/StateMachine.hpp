@@ -2,6 +2,7 @@
 
 #include <pluginlib/class_loader.h>
 #include <ros/ros.h>
+#include <whud_state_machine/GetTaskList.h>
 
 #include <vector>
 
@@ -27,6 +28,7 @@ private:
   int loop_frequency_;
   int state_machine_threads_;
   MavRosPublisher mavros_pub_;
+  ros::ServiceServer get_task_list_srv_;
 
   // tasks
   StateMachineStatus state_machine_status_;
@@ -54,6 +56,10 @@ private:
   void LoadPlugin(std::string &plugin_name);
   void LoadMainTask(std::string &task_name);
   void SetInterruptTask(std::string &task_name);
+
+  bool GetTaskList(GetTaskList::Request &req, GetTaskList::Response &res);
+  WhudMainTask WrapMainTask(const MainTask task);
+  WhudInterruptTask WrapInterruptTask(const string task_name);
 };
 
 }  // namespace whud_state_machine
