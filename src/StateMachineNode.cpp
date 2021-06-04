@@ -1,3 +1,13 @@
+/**
+ * @file StateMachineNode.cpp
+ * @author LauZanMo (LauZanMo@whu.edu.cn)
+ * @brief 
+ * @version 1.0
+ * @date 2021-06-04
+ * 
+ * @copyright Copyright (c) 2021 WHU-Drones
+ * 
+ */
 #include <ros/ros.h>
 
 #include "StateMachine.hpp"
