@@ -18,7 +18,7 @@ namespace whud_state_machine {
 
 class PluginBase {
 public:
-  PluginBase() : nh_("~") {}
+  PluginBase() : base_nh_("~") {}
   PluginBase(const PluginBase&) = delete;
   ~PluginBase() {}
 
@@ -39,7 +39,7 @@ public:
   }
 
   virtual void OnInit(MavRosPublisher& mavros_pub) {
-    nh_.param<int>("loop_frequency", loop_frequency_, 10);
+    base_nh_.param<int>("loop_frequency", loop_frequency_, 10);
     mavros_pub_ = &mavros_pub;
   }
 
@@ -54,7 +54,7 @@ public:
   virtual void StopTask() = 0;
 
 protected:
-  ros::NodeHandle nh_;
+  ros::NodeHandle base_nh_;
 
   MavRosPublisher* mavros_pub_ = nullptr;
   TaskStatus task_status_;
