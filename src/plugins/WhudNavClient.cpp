@@ -8,7 +8,6 @@
  * @copyright Copyright (c) 2021 WHU-Drones
  *
  */
-
 #include <actionlib/client/simple_action_client.h>
 #include <geometry_msgs/Pose.h>
 #include <move_base_msgs/MoveBaseAction.h>
@@ -46,7 +45,7 @@ public:
    * will wait for action server and transform set up
    *
    * @warning You need to set up move base action server and transform between
-   * map frame and bodyframe, unless the state machine will be stucked in this
+   * map frame and body frame, unless the state machine will be stucked in this
    * plugin init
    *
    * @param mavros_pub mavros publisher passed by state machine
