@@ -75,6 +75,7 @@ public:
    * task according to the paramter parse:
    * param[0]: position x
    * param[1]: position y
+   * param[2]: delay time
    *
    * @retval true: Parameters are parsed correctly
    * @retval false: Parameters are parsed wrong
@@ -92,6 +93,7 @@ public:
     set_pose.orientation.y = q.getY();
     set_pose.orientation.z = q.getZ();
     set_pose.orientation.w = q.getW();
+    SetDelay(atof(param[2].c_str()));
 
     // detect consensus with last set pose
     if (!ConsensusDetector(set_pose)) {
