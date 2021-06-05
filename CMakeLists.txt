@@ -56,6 +56,7 @@ add_message_files(
   FILES
   WhudMainTask.msg
   WhudInterruptTask.msg
+  WhudTask.msg
 )
 
 ## Generate services in the 'srv' folder

@@ -1,12 +1,12 @@
 /**
  * @file DataStructure.hpp
  * @author LauZanMo (LauZanMo@whu.edu.cn)
- * @brief 
+ * @brief State machine data structure
  * @version 1.0
  * @date 2021-06-04
- * 
+ *
  * @copyright Copyright (c) 2021 WHU-Drones
- * 
+ *
  */
 #pragma once
 

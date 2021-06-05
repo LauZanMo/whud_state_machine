@@ -1,4 +1,3 @@
-bool Call
+bool call
 ---
-WhudMainTask[] MainTaskList
-WhudInterruptTask[] InterruptTaskList
+WhudTask[] task_list

@@ -1,12 +1,12 @@
 /**
  * @file StateMachine.cpp
  * @author LauZanMo (LauZanMo@whu.edu.cn)
- * @brief 
+ * @brief State machine class
  * @version 1.0
  * @date 2021-06-04
- * 
+ *
  * @copyright Copyright (c) 2021 WHU-Drones
- * 
+ *
  */
 #include "StateMachine.hpp"
 
@@ -116,7 +116,8 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
     if (interrupt_flag) {
       // check last interrupt flag
       if (last_interrupt_flag_ != interrupt_flag) {
-        ROS_INFO_STREAM("Current task is " + main_task_iterator_->attach_name + ".");
+        ROS_INFO_STREAM("Current task is " + main_task_iterator_->attach_name +
+                        ".");
 
         // record begin time
         interrupt_task_begin_time_ = event.current_expected.now().toSec();
@@ -233,7 +234,8 @@ void StateMachine::CheckLoopStatus() {
     break;
 
   case StateMachineStatus::INTERRUPT_TASK_TIMEOUT:
-    ROS_WARN_STREAM("Task " + main_task_iterator_->attach_name + " is timeout!");
+    ROS_WARN_STREAM("Task " + main_task_iterator_->attach_name +
+                    " is timeout!");
 
     // stop current task
     current_interrupt_task_plugin_->StopTask();
@@ -296,13 +298,13 @@ void StateMachine::SetInterruptTask(std::string &task_name) {
 
 bool StateMachine::GetTaskList(whud_state_machine::GetTaskList::Request &req,
                                whud_state_machine::GetTaskList::Response &res) {
-  if (req.Call) {
-    res.MainTaskList.clear();
-    res.InterruptTaskList.clear();
-    for (auto &task : main_task_vector_) {
-      res.MainTaskList.push_back(WrapMainTask(task));
-      if (task.attach_name != "none")
-        res.InterruptTaskList.push_back(WrapInterruptTask(task.attach_name));
+  if (req.call) {
+    res.task_list.clear();
+    for (auto &main_task : main_task_vector_) {
+      WhudTask task;
+      task.main_task = WrapMainTask(main_task);
+      task.interrupt_task = WrapInterruptTask(main_task.attach_name);
+      res.task_list.push_back(task);
     }
   }
   return true;
@@ -310,26 +312,37 @@ bool StateMachine::GetTaskList(whud_state_machine::GetTaskList::Request &req,
 
 WhudMainTask StateMachine::WrapMainTask(const MainTask task) {
   WhudMainTask wrap_task;
+
   wrap_task.plugin_name = task.plugin_name;
   wrap_task.delay_timeout = task.delay_timeout;
   wrap_task.param = task.param;
   wrap_task.task_name = task.task_name;
   wrap_task.attach_name = task.attach_name;
+
   return wrap_task;
 }
 
 WhudInterruptTask StateMachine::WrapInterruptTask(const string task_name) {
   WhudInterruptTask wrap_task;
   InterruptTask task;
-  nh_.getParam(task_name + "/plugin_name", task.plugin_name);
-  nh_.getParam(task_name + "/delay_timeout", task.delay_timeout);
-  nh_.getParam(task_name + "/param", task.param);
-  nh_.getParam(task_name + "/return_name", task.return_name);
 
-  wrap_task.plugin_name = task.plugin_name;
-  wrap_task.delay_timeout = task.delay_timeout;
-  wrap_task.param = task.param;
-  wrap_task.return_name = task.return_name;
+  if (task_name != "none") {
+    nh_.getParam(task_name + "/plugin_name", task.plugin_name);
+    nh_.getParam(task_name + "/delay_timeout", task.delay_timeout);
+    nh_.getParam(task_name + "/param", task.param);
+    nh_.getParam(task_name + "/return_name", task.return_name);
+
+    wrap_task.plugin_name = task.plugin_name;
+    wrap_task.delay_timeout = task.delay_timeout;
+    wrap_task.param = task.param;
+    wrap_task.return_name = task.return_name;
+  } else {
+    wrap_task.plugin_name = "none";
+    wrap_task.delay_timeout = 0;
+    wrap_task.param.clear();
+    wrap_task.return_name = "none";
+  }
+
   return wrap_task;
 }
 

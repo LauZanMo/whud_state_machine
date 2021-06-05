@@ -73,7 +73,9 @@ public:
    * to move base server after consensus detect
    *
    * @param param Parameter vector passed by state machine, plugins will set
-   * task according to the paramter parse
+   * task according to the paramter parse:
+   * param[0]: position x
+   * param[1]: position y
    *
    * @retval true: Parameters are parsed correctly
    * @retval false: Parameters are parsed wrong
