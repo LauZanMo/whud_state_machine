@@ -59,6 +59,9 @@ public:
     nav_vel_sub_ =
         nh_.subscribe("cmd_vel", 1, &WhudNavClient::nav_vel_cb, this);
 
+    ROS_INFO(
+        "Wait for navigation server and transform set up, please be sure they "
+        "will be set up.");
     nav_client_.waitForServer();
     tf_listener_.waitForTransform("/" + map_frame_id_, "/" + body_frame_id_,
                                   ros::Time(0), ros::Duration(0, 0));
@@ -93,7 +96,7 @@ public:
     set_pose.orientation.y = q.getY();
     set_pose.orientation.z = q.getZ();
     set_pose.orientation.w = q.getW();
-    SetDelay(atof(param[2].c_str()));
+    SetFinishDelay(atof(param[2].c_str()));
 
     // detect consensus with last set pose
     if (!ConsensusDetector(set_pose)) {
@@ -109,6 +112,8 @@ public:
           std::bind(&WhudNavClient::ActiveCb, this),
           std::bind(&WhudNavClient::FeedbackCb, this, std::placeholders::_1));
     }
+
+    return true;
   }
 
   /**

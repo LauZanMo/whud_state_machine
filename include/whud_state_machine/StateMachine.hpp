@@ -13,6 +13,7 @@
 #include <pluginlib/class_loader.h>
 #include <ros/ros.h>
 #include <whud_state_machine/GetTaskList.h>
+#include <whud_state_machine/ResetTaskIterator.h>
 
 #include <vector>
 
@@ -37,8 +38,11 @@ private:
   ros::Timer loop_timer_;
   int loop_frequency_;
   int state_machine_threads_;
+
   MavRosPublisher mavros_pub_;
+  ros::Publisher current_task_name_pub_;
   ros::ServiceServer get_task_list_srv_;
+  ros::ServiceServer reset_task_iter_srv_;
 
   // tasks
   StateMachineStatus state_machine_status_;
@@ -66,10 +70,17 @@ private:
   void LoadPlugin(std::string &plugin_name);
   void LoadMainTask(std::string &task_name);
   void SetInterruptTask(std::string &task_name);
+  void ResetTaskIterator();
+  void PublishCurrentTaskName();
 
+  // get task list service
   bool GetTaskList(GetTaskList::Request &req, GetTaskList::Response &res);
   WhudMainTask WrapMainTask(const MainTask task);
   WhudInterruptTask WrapInterruptTask(const string task_name);
+
+  // reset task iterator service
+  bool ResetTaskIterator(ResetTaskIterator::Request &req,
+                         ResetTaskIterator::Response &res);
 };
 
 }  // namespace whud_state_machine

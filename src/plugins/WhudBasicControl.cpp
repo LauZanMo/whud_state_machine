@@ -70,6 +70,8 @@ public:
     } else {
       command_ = Command::NONE;
     }
+
+    return true;
   }
 
   virtual void TaskSpin() override {

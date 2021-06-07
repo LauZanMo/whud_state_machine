@@ -34,8 +34,8 @@ public:
   inline void DisableControl() {
     control_flag_ = false;
   }
-  inline bool Delay() {
-    return (delay_counter_++ >= delay_time_ * loop_frequency_);
+  inline bool FinishDelay() {
+    return (finish_delay_counter_++ >= finish_delay_time_ * loop_frequency_);
   }
 
   virtual void OnInit(MavRosPublisher& mavros_pub) {
@@ -46,8 +46,8 @@ public:
   virtual bool SetTask(ros::V_string param) {
     task_status_ = TaskStatus::RUN;
     interrupt_signal_ = false;
-    delay_counter_ = 0;
-    SetDelay(0);
+    finish_delay_counter_ = 0;
+    SetFinishDelay(0);
   }
 
   virtual void TaskSpin() = 0;
@@ -62,11 +62,11 @@ protected:
   bool control_flag_;
 
   int loop_frequency_;
-  float delay_time_ = 0;
-  int delay_counter_;
+  float finish_delay_time_ = 0;
+  int finish_delay_counter_;
 
-  inline void SetDelay(float time) {
-    delay_time_ = time;
+  inline void SetFinishDelay(float time) {
+    finish_delay_time_ = time;
   }
 };
 
