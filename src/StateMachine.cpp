@@ -322,13 +322,16 @@ void StateMachine::ResetTaskIterator() {
 
   // reset state machine status
   state_machine_status_ = StateMachineStatus::FREE;
+
+  // reset interrupt flag
+  last_interrupt_flag_ = disable_interrupt_flag_ = false;
 }
 
 void StateMachine::PublishCurrentTaskName() {
   std_msgs::String task_name;
   if (state_machine_status_ == StateMachineStatus::MAIN_TASK)
     task_name.data = main_task_iterator_->task_name;
-  else
+  else if (state_machine_status_ == StateMachineStatus::INTERRUPT_TASK)
     task_name.data = main_task_iterator_->attach_name;
   current_task_name_pub_.publish(task_name);
 }
