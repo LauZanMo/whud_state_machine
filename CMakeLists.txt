@@ -130,6 +130,7 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/plugins/WhudNavClient.cpp
   src/plugins/WhudBasicControl.cpp
+  src/plugins/WhudSwitch.cpp
 )
 
 ## Add cmake target dependencies of the library

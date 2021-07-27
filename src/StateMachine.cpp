@@ -20,6 +20,13 @@ using namespace std;
 
 namespace whud_state_machine {
 
+/**
+ * @brief Initialize state machine with given parameters
+ *
+ * @note Construct a new State Machine:: State Machine object, define the mavros
+ * publishers, load the plugins needed and load the main task list, initialize
+ * service and reset task iterator.
+ */
 StateMachine::StateMachine()
     : nh_("~"),
       state_machine_status_(StateMachineStatus::FREE),
@@ -29,6 +36,8 @@ StateMachine::StateMachine()
   nh_.getParam("main_task_list", main_task_list_);
 
   // init publisher
+  mavros_pub_.set_mode_pub =
+      nh_.advertise<std_msgs::Float64MultiArray>("set_mode", 5);
   mavros_pub_.takeoff_pub =
       nh_.advertise<std_msgs::Float64MultiArray>("takeoff_height", 5);
   mavros_pub_.height_pub =
@@ -59,6 +68,12 @@ StateMachine::StateMachine()
 
 StateMachine::~StateMachine() {}
 
+/**
+ * @brief Start state machine and wait for shut down
+ *
+ * @note Set the loop frequency of state machine(default 10Hz) and loop state
+ * machine until it shuts down
+ */
 void StateMachine::Run() {
   ros::AsyncSpinner spinner(state_machine_threads_);
 
@@ -71,6 +86,15 @@ void StateMachine::Run() {
   spinner.stop();
 }
 
+/**
+ * @brief Set a new task or spin current task when callback.
+ *
+ * @note Set a new task or spin the current task according to task status at
+ * every callback.
+ *
+ * @param event A timer object which records the begin time and end time of
+ * tasks to judge if tasks are out of time.
+ */
 void StateMachine::LoopTimerCb(const ros::TimerEvent &event) {
   if (state_machine_status_ == StateMachineStatus::FREE)
     SetTask(event);
@@ -83,6 +107,20 @@ void StateMachine::LoopTimerCb(const ros::TimerEvent &event) {
   CheckLoopStatus();
 }
 
+/**
+ * @brief Set a new main task.
+ *
+ * @note In this function, a new main task will be set according to the order
+ * of main task list and the tast status will be changed to MAIN_TASK, which
+ * means a new main task is spinning now.
+ *
+ * @warning If disable_interrupt_flag_ is set to true because interrupt(attach)
+ * task is out of time, then the interrupt task is disabled and it will not be
+ * activated again is allowed until next main task.
+ *
+ * @param event A timer object which records the begin time and end time of
+ * tasks to judge if tasks are out of time.
+ */
 void StateMachine::SetTask(const ros::TimerEvent &event) {
   // set main task
   current_main_task_plugin_ = plugin_map_[main_task_iterator_->plugin_name];
@@ -112,6 +150,19 @@ void StateMachine::SetTask(const ros::TimerEvent &event) {
   state_machine_status_ = StateMachineStatus::MAIN_TASK;
 }
 
+/**
+ * @brief Check if interrupt task is detected and if task out of time.
+ *
+ * @note Check whether interrupt signal is catched and whether task is out of
+ * time. If a interrupt signal is catched, the main task is disabled and
+ * interrupt task is enabled. If current task is main task and it's out of time,
+ * then state machine status is set to MAIN_TASK_TIMEOUT. If current task is
+ * interrupt task and it's out of time, then state machine status is set to
+ * INTERRUPT_TASK_TIMEOUT.
+ *
+ * @param event A timer object which records the begin time and end time of
+ * tasks to judge if tasks are out of time.
+ */
 void StateMachine::TaskSpin(const ros::TimerEvent &event) {
   // check interrupt plugin ptr
   if (current_interrupt_task_plugin_ != nullptr) {
@@ -169,6 +220,17 @@ void StateMachine::TaskSpin(const ros::TimerEvent &event) {
   }
 }
 
+/**
+ * @brief Check current status and choose next status and task.
+ *
+ * @note If current task is main task and it's done or out of time, then
+ * state machine will change to FREE status and conduct next main task.
+ * If current task is interrupt(attach) task and it's done, then state
+ * machine will change to FREE status and return to the main task which is set
+ * in interrupt_task.yaml file. If current task is interrupt(attach)
+ * task and it's out of time, then state machine will change to FREE status
+ * and return the main task where interruptions happened.
+ */
 void StateMachine::CheckLoopStatus() {
   switch (state_machine_status_) {
   case StateMachineStatus::MAIN_TASK:
@@ -269,12 +331,25 @@ void StateMachine::CheckLoopStatus() {
   }
 }
 
+/**
+ * @brief Create plugin object and initialize them.
+ *
+ * @param plugin_name Name of plugin.
+ */
 void StateMachine::LoadPlugin(std::string &plugin_name) {
   plugin_map_[plugin_name] = plugin_loader_.createInstance(plugin_name);
   plugin_map_[plugin_name]->OnInit(mavros_pub_);
   // TODO: add blacklist and whitelist for plugins
 }
 
+/**
+ * @brief Reserve the basic parameters required by main task.
+ *
+ * @warning Parameter task_name is not required to be the same
+ * as plugin name. It's only a string defined by user himself.
+ *
+ * @param task_name Name of main task.
+ */
 void StateMachine::LoadMainTask(std::string &task_name) {
   // TODO: catch error and output if users' configuration files are wrong
   MainTask task;
@@ -286,6 +361,14 @@ void StateMachine::LoadMainTask(std::string &task_name) {
   main_task_vector_.push_back(task);
 }
 
+/**
+ * @brief Reserve the basic parameters required by interrupt task.
+ *
+ * @note If no interrupt task is set("task_name" is none) or parameters
+ * are parsed incorrectly, then the interrupt plugin is disabled.
+ *
+ * @param task_name Name of interrupt task.
+ */
 void StateMachine::SetInterruptTask(std::string &task_name) {
   if (task_name != "none") {
     // TODO: catch error and output if users' configuration files are wrong
@@ -310,6 +393,12 @@ void StateMachine::SetInterruptTask(std::string &task_name) {
     current_interrupt_task_plugin_ = nullptr;
 }
 
+/**
+ * @brief Restart state machine.
+ *
+ * @note Reset the task iterator to the first task, and
+ * it's equal to restart the state machine.
+ */
 void StateMachine::ResetTaskIterator() {
   // check main task empty
   if (main_task_list_.empty()) {
@@ -327,6 +416,9 @@ void StateMachine::ResetTaskIterator() {
   last_interrupt_flag_ = disable_interrupt_flag_ = false;
 }
 
+/**
+ * @brief Publish the current task name.
+ */
 void StateMachine::PublishCurrentTaskName() {
   std_msgs::String task_name;
   if (state_machine_status_ == StateMachineStatus::MAIN_TASK)
@@ -336,6 +428,14 @@ void StateMachine::PublishCurrentTaskName() {
   current_task_name_pub_.publish(task_name);
 }
 
+/**
+ * @brief Get task list service function.
+ *
+ * @param req Request.
+ * @param res Response.
+ * @return true: Service done.
+ * @return false: Service fail.
+ */
 bool StateMachine::GetTaskList(whud_state_machine::GetTaskList::Request &req,
                                whud_state_machine::GetTaskList::Response &res) {
   if (req.call) {
@@ -350,6 +450,12 @@ bool StateMachine::GetTaskList(whud_state_machine::GetTaskList::Request &req,
   return true;
 }
 
+/**
+ * @brief Wrap main task to msg type.
+ *
+ * @param task Main task.
+ * @return WhudMainTask: Main task msg type.
+ */
 WhudMainTask StateMachine::WrapMainTask(const MainTask task) {
   WhudMainTask wrap_task;
 
@@ -362,6 +468,12 @@ WhudMainTask StateMachine::WrapMainTask(const MainTask task) {
   return wrap_task;
 }
 
+/**
+ * @brief Wrap interrupt task to msg type.
+ *
+ * @param task_name Interrupt task.
+ * @return WhudInterruptTask: Interrupt task msg type.
+ */
 WhudInterruptTask StateMachine::WrapInterruptTask(const string task_name) {
   WhudInterruptTask wrap_task;
   InterruptTask task;
@@ -386,6 +498,14 @@ WhudInterruptTask StateMachine::WrapInterruptTask(const string task_name) {
   return wrap_task;
 }
 
+/**
+ * @brief Reset task iterator service.
+ *
+ * @param req Request.
+ * @param res Response.
+ * @return true: Service done.
+ * @return false: Service fail.
+ */
 bool StateMachine::ResetTaskIterator(ResetTaskIterator::Request &req,
                                      ResetTaskIterator::Response &res) {
   if (req.call) {

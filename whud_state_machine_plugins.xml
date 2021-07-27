@@ -11,5 +11,11 @@
     Control basic move(takeoff, land, yaw and height-control)
     </description>
   </class>
+  
+  <class name="whud_switch" type="whud_state_machine::WhudSwitch" base_class_type="whud_state_machine::PluginBase">
+    <description>
+    Switch on or switch off state machine.
+    </description>
+  </class>
 
 </library>

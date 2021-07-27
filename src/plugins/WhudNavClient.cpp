@@ -87,6 +87,7 @@ public:
     PluginBase::SetTask(param);
     // parse param passed by state machine
     geometry_msgs::Pose set_pose;
+    if (param.size() < 3) return false;
     set_pose.position.x = (atof(param[0].c_str()));
     set_pose.position.y = (atof(param[1].c_str()));
     set_pose.position.z = 0;

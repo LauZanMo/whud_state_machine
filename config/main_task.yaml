@@ -7,8 +7,10 @@
 # - task_B
 #   ...
 main_task_list:
-  - task_A
-  - task_B
+  - start_switch
+  - set_mode
+  - take_off
+  - land
 
 #
 # main task description
@@ -22,16 +24,30 @@ main_task_list:
 #   task_name: "task_A"
 #   attach_name:
 
-task_A:
-  plugin_name: "whud_basic_control"
-  delay_timeout: 10
-  param: [takeoff, "0", "1.0"]
-  task_name: "task_A"
+start_switch:
+  plugin_name: "whud_switch"
+  delay_timeout: 9999
+  param: [state_machine_switch]
+  task_name: "start_switch"
   attach_name: "none"
 
-task_B:
+set_mode:
   plugin_name: "whud_basic_control"
   delay_timeout: 10
-  param: [takeoff, "0", "1.0"]
-  task_name: "task_B"
+  param: [set_mode, "0", "35"]
+  task_name: "set_mode"
+  attach_name: "none"
+
+take_off:
+  plugin_name: "whud_basic_control"
+  delay_timeout: 10
+  param: [take_off, "0", "1.0"]
+  task_name: "take_off"
+  attach_name: "none"
+
+land:
+  plugin_name: "whud_basic_control"
+  delay_timeout: 10
+  param: [land, "0.3"]
+  task_name: "land"
   attach_name: "none"

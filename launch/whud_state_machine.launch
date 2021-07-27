@@ -1,13 +1,23 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="loop_frequency" default="10"/>
+  <arg name="state_machine_threads" default="4"/>
+  <arg name="config_file_path" default="$(find whud_state_machine)/config"/>
 
   <node pkg="whud_state_machine" type="whud_state_machine_node" name="whud_state_machine_node" output="screen">
-    <param name="loop_frequency" value="10"/>
-    <param name="state_machine_threads" value="4"/>
+    <param name="loop_frequency" value="$(arg loop_frequency)"/>
+    <param name="state_machine_threads" value="$(arg state_machine_threads)"/>
 
-    <rosparam file="$(find whud_state_machine)/config/main_task.yaml" command="load"/>
-    <rosparam file="$(find whud_state_machine)/config/interrupt_task.yaml" command="load"/>
-    <rosparam file="$(find whud_state_machine)/config/plugin_params.yaml" command="load"/>
+    <rosparam file="$(arg config_file_path)/main_task.yaml" command="load"/>
+    <rosparam file="$(arg config_file_path)/interrupt_task.yaml" command="load"/>
+    <rosparam file="$(arg config_file_path)/plugin_params.yaml" command="load"/>
+
+    <remap from="/whud_state_machine_node/set_mode" to="/mavros/whud_basic/set_mode"/>
+    <remap from="/whud_state_machine_node/takeoff_height" to="/mavros/whud_basic/takeoff_height"/>
+    <remap from="/whud_state_machine_node/land" to="/mavros/whud_basic/land"/>
+    <remap from="/whud_state_machine_node/height" to="/mavros/whud_basic/height"/>
+    <remap from="/whud_state_machine_node/yaw" to="/mavros/whud_basic/yaw"/>
+    <remap from="/whud_state_machine_node/cmd_vel" to="/mavros/whud_nav/cmd_vel"/>
+    <remap from="/whud_state_machine_node/conversion" to="/mavros/whud_nav/conversion"/>
   </node>
-
 </launch>

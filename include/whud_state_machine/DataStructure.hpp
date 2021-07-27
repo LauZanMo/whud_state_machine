@@ -48,6 +48,8 @@ struct MavRosPublisher {
   ros::Publisher land_pub;
   ros::Publisher height_pub;
   ros::Publisher yaw_pub;
+  ros::Publisher set_mode_pub;
+  ros::Publisher play_tune_pub;
 
   // nav cmd
   ros::Publisher cmd_vel_pub;
